@@ -2,22 +2,24 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from be_task_ca.user.adapters.db.cart_repository import SqlAlchemyCartRepository
+from be_task_ca.user.adapters.db.inventory_gateway import SqlAlchemyInventoryGateway
 from be_task_ca.user.adapters.db.user_repository import SqlAlchemyUserRepository
-from be_task_ca.user.application.dto import CreateUserCommand, CreateUserResult
-from be_task_ca.user.application.exceptions import UserAlreadyExistsError
+from be_task_ca.user.application.dto import (
+    AddToCartCommand,
+    CreateUserCommand,
+    CreateUserResult,
+)
+from be_task_ca.user.application.exceptions import (
+    ItemAlreadyInCartError,
+    ItemNotFoundError,
+    NotEnoughStockError,
+    UserAlreadyExistsError,
+    UserNotFoundError,
+)
+from be_task_ca.user.application.usecases.add_item_to_cart import AddItemToCartUseCase
 from be_task_ca.user.application.usecases.create_user import CreateUserUseCase
 from be_task_ca.user.application.usecases.list_cart_items import ListCartItemsUseCase
 
-from ..item.model import Item
-
-from ..item.repository import find_item_by_id
-
-from .model import CartItem, User
-
-from .repository import (
-    find_user_by_id,
-    save_user,
-)
 from .schema import (
     AddToCartRequest,
     AddToCartResponse,
@@ -67,32 +69,29 @@ def cart_item_result_to_schema(result):
     return AddToCartRequest(item_id=result.item_id, quantity=result.quantity)
 
 
-def cart_item_model_to_schema(model: CartItem):
-    """Backward-compatible alias kept temporarily during migration."""
-    return AddToCartRequest(item_id=model.item_id, quantity=model.quantity)
-
-
 def add_item_to_cart(user_id: int, cart_item: AddToCartRequest, db: Session) -> AddToCartResponse:
-    user: User = find_user_by_id(user_id, db)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User does not exist")
-
-    item: Item = find_item_by_id(cart_item.item_id, db)
-    if item is None:
-        raise HTTPException(status_code=404, detail="Item does not exist")
-    if item.quantity < cart_item.quantity:
-        raise HTTPException(status_code=409, detail="Not enough items in stock")
-
-    item_ids = [o.item_id for o in user.cart_items]
-    if cart_item.item_id in item_ids:
-        raise HTTPException(status_code=409, detail="Item already in cart")
-
-    new_cart_item: CartItem = CartItem(
-        user_id=user.id, item_id=cart_item.item_id, quantity=cart_item.quantity
+    user_repository = SqlAlchemyUserRepository(db)
+    cart_repository = SqlAlchemyCartRepository(db)
+    inventory_gateway = SqlAlchemyInventoryGateway(db)
+    use_case = AddItemToCartUseCase(
+        user_repository=user_repository,
+        cart_repository=cart_repository,
+        inventory_gateway=inventory_gateway,
     )
 
-    user.cart_items.append(new_cart_item)
+    command = AddToCartCommand(
+        user_id=user_id,
+        item_id=cart_item.item_id,
+        quantity=cart_item.quantity,
+    )
 
-    save_user(user, db)
+    try:
+        result = use_case.execute(command)
+    except UserNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ItemNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (NotEnoughStockError, ItemAlreadyInCartError) as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
-    return list_items_in_cart(user.id, db)
+    return AddToCartResponse(items=list(map(cart_item_result_to_schema, result.items)))
