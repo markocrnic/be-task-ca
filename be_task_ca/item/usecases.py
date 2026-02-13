@@ -1,37 +1,41 @@
-from typing import List
 from fastapi import HTTPException
-
-from .repository import find_item_by_name, get_all_items, save_item
-
-from .model import Item
-from .schema import AllItemsRepsonse, CreateItemRequest, CreateItemResponse
 from sqlalchemy.orm import Session
+
+from be_task_ca.item.adapters.db.repository import SqlAlchemyItemRepository
+from be_task_ca.item.application.dto import CreateItemCommand, CreateItemResult
+from be_task_ca.item.application.exceptions import ItemAlreadyExistsError
+from be_task_ca.item.application.usecases.create_item import CreateItemUseCase
+from be_task_ca.item.application.usecases.list_items import ListItemsUseCase
+from .schema import AllItemsRepsonse, CreateItemRequest, CreateItemResponse
 
 
 def create_item(item: CreateItemRequest, db: Session) -> CreateItemResponse:
-    search_result = find_item_by_name(item.name, db)
-    if search_result is not None:
-        raise HTTPException(
-            status_code=409, detail="An item with this name already exists"
-        )
+    repository = SqlAlchemyItemRepository(db)
+    use_case = CreateItemUseCase(repository)
 
-    new_item = Item(
+    command = CreateItemCommand(
         name=item.name,
         description=item.description,
         price=item.price,
         quantity=item.quantity,
     )
 
-    save_item(new_item, db)
-    return model_to_schema(new_item)
+    try:
+        result = use_case.execute(command)
+    except ItemAlreadyExistsError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    return result_to_schema(result)
 
 
-def get_all(db: Session) -> List[CreateItemResponse]:
-    item_list = get_all_items(db)
-    return AllItemsRepsonse(items=list(map(model_to_schema, item_list)))
+def get_all(db: Session):
+    repository = SqlAlchemyItemRepository(db)
+    use_case = ListItemsUseCase(repository)
+    item_list = use_case.execute()
+    return AllItemsRepsonse(items=list(map(result_to_schema, item_list.items)))
 
 
-def model_to_schema(item: Item) -> CreateItemResponse:
+def result_to_schema(item: CreateItemResult) -> CreateItemResponse:
     return CreateItemResponse(
         id=item.id,
         name=item.name,
@@ -39,3 +43,8 @@ def model_to_schema(item: Item) -> CreateItemResponse:
         price=item.price,
         quantity=item.quantity,
     )
+
+
+def model_to_schema(item) -> CreateItemResponse:
+    """Backward-compatible alias kept temporarily during migration."""
+    return result_to_schema(item)
