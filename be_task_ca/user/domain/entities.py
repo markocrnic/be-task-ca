@@ -6,7 +6,7 @@ from uuid import UUID
 
 @dataclass(frozen=True)
 class UserEntity:
-    id: UUID
+    id: UUID | None
     email: str
     first_name: str
     last_name: str
