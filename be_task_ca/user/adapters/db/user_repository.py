@@ -20,19 +20,19 @@ class SqlAlchemyUserRepository(UserRepositoryInterface):
         self._db = db
 
     def save_user(self, user: UserEntity) -> UserEntity:
-        model = to_model(user)
+        model = user_item_entity_to_model(user)
         self._db.add(model)
         self._db.commit()
-        return to_entity(model)
+        return user_item_model_to_entity(model)
 
     def find_user_by_email(self, email: str) -> UserEntity | None:
         model = self._db.query(User).filter(User.email == email).first()
         if model is None:
             return None
-        return to_entity(model)
+        return user_item_model_to_entity(model)
 
     def find_user_by_id(self, user_id: UUID) -> UserEntity | None:
         model = self._db.query(User).filter(User.id == user_id).first()
         if model is None:
             return None
-        return to_entity(model)
+        return user_item_model_to_entity(model)
