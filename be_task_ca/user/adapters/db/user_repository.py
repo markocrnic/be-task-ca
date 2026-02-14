@@ -8,7 +8,7 @@ from be_task_ca.user.application.interfaces.user_repository_interface import (
     UserRepositoryInterface,
 )
 from be_task_ca.user.domain.entities import UserEntity
-from be_task_ca.user.model import User
+from be_task_ca.user.adapters.db.model import User
 
 from .mappers import user_item_entity_to_model, user_item_model_to_entity
 

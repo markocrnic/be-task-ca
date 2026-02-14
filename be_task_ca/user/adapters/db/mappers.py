@@ -1,7 +1,7 @@
 """Mapping helpers for user DB adapters."""
 
 from be_task_ca.user.domain.entities import CartItemEntity, UserEntity
-from be_task_ca.user.model import CartItem, User
+from be_task_ca.user.adapters.db.model import CartItem, User
 
 
 def user_item_model_to_entity(model: User) -> UserEntity:

@@ -8,7 +8,7 @@ from be_task_ca.item.application.interfaces.item_repository_interface import (
     ItemRepositoryInterface,
 )
 from be_task_ca.item.domain.entities import ItemEntity
-from be_task_ca.item.model import Item
+from be_task_ca.item.adapters.db.model import Item
 
 from .mappers import to_entity, to_model
 

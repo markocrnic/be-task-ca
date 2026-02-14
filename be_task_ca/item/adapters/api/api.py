@@ -1,15 +1,12 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from be_task_ca.common import get_db
+from be_task_ca.item.adapters.api.schema import CreateItemRequest, CreateItemResponse
 from be_task_ca.item.adapters.db.repository import SqlAlchemyItemRepository
 from be_task_ca.item.application.usecases.create_item import CreateItemUseCase
 from be_task_ca.item.application.usecases.list_items import ListItemsUseCase
-
-from .usecases import create_item, get_all
-
-from ..common import get_db
-
-from .schema import CreateItemRequest, CreateItemResponse
+from be_task_ca.item.adapters.api.handlers import create_item, get_all
 
 
 item_router = APIRouter(

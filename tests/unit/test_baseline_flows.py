@@ -1,16 +1,20 @@
 from be_task_ca.item.adapters.db.repository import SqlAlchemyItemRepository
+from be_task_ca.item.adapters.api.schema import CreateItemRequest
+from be_task_ca.item.adapters.api.handlers import create_item, get_all
 from be_task_ca.item.application.usecases.create_item import CreateItemUseCase
 from be_task_ca.item.application.usecases.list_items import ListItemsUseCase
-from be_task_ca.item.schema import CreateItemRequest
-from be_task_ca.item.usecases import create_item, get_all
+from be_task_ca.user.adapters.api.schema import AddToCartRequest, CreateUserRequest
+from be_task_ca.user.adapters.api.handlers import (
+    add_item_to_cart,
+    create_user,
+    list_items_in_cart,
+)
 from be_task_ca.user.adapters.db.cart_repository import SqlAlchemyCartRepository
 from be_task_ca.user.adapters.db.inventory_gateway import SqlAlchemyInventoryGateway
 from be_task_ca.user.adapters.db.user_repository import SqlAlchemyUserRepository
 from be_task_ca.user.application.usecases.add_item_to_cart import AddItemToCartUseCase
 from be_task_ca.user.application.usecases.create_user import CreateUserUseCase
 from be_task_ca.user.application.usecases.list_cart_items import ListCartItemsUseCase
-from be_task_ca.user.schema import AddToCartRequest, CreateUserRequest
-from be_task_ca.user.usecases import add_item_to_cart, create_user, list_items_in_cart
 
 
 def test_should_create_user_when_payload_is_valid(db_session):

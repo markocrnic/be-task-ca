@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from uuid import UUID, uuid4
+
 from sqlalchemy.orm import Mapped, mapped_column
+
 from be_task_ca.database import Base
 
 

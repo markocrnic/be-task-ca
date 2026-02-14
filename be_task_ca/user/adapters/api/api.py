@@ -1,19 +1,21 @@
 from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from be_task_ca.common import get_db
+from be_task_ca.user.adapters.api.schema import AddToCartRequest, CreateUserRequest
 from be_task_ca.user.adapters.db.cart_repository import SqlAlchemyCartRepository
 from be_task_ca.user.adapters.db.inventory_gateway import SqlAlchemyInventoryGateway
 from be_task_ca.user.adapters.db.user_repository import SqlAlchemyUserRepository
 from be_task_ca.user.application.usecases.add_item_to_cart import AddItemToCartUseCase
 from be_task_ca.user.application.usecases.create_user import CreateUserUseCase
 from be_task_ca.user.application.usecases.list_cart_items import ListCartItemsUseCase
-
-from ..common import get_db
-
-from .usecases import add_item_to_cart, create_user, list_items_in_cart
-
-from .schema import AddToCartRequest, CreateUserRequest
+from be_task_ca.user.adapters.api.handlers import (
+    add_item_to_cart,
+    create_user,
+    list_items_in_cart,
+)
 
 
 user_router = APIRouter(

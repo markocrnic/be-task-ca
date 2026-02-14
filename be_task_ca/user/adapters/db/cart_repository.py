@@ -8,7 +8,7 @@ from be_task_ca.user.application.interfaces.cart_repository_interface import (
     CartRepositoryInterface,
 )
 from be_task_ca.user.domain.entities import CartItemEntity
-from be_task_ca.user.model import CartItem
+from be_task_ca.user.adapters.db.model import CartItem
 
 from .mappers import cart_item_entity_to_model, cart_item_model_to_entity
 

@@ -2,9 +2,10 @@ from dataclasses import dataclass
 from typing import List
 import uuid
 
-from sqlalchemy import UUID, ForeignKey
-from be_task_ca.database import Base
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from be_task_ca.database import Base
 
 
 @dataclass

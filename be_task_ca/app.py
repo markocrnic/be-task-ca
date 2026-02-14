@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Request, Response
-from .user.api import user_router
-from .item.api import item_router
-from be_task_ca.user import model
+from be_task_ca.item.adapters.api.api import item_router
+from be_task_ca.user.adapters.api.api import user_router
+from be_task_ca.item.adapters.db import model as _item_model  # noqa: F401
+from be_task_ca.user.adapters.db import model as _user_model  # noqa: F401
 
 from .database import SessionLocal, engine
 

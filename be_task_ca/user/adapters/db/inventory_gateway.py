@@ -4,7 +4,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from be_task_ca.item.model import Item
+from be_task_ca.item.adapters.db.model import Item
 from be_task_ca.user.application.interfaces.inventory_gateway_interface import (
     InventoryItemSnapshot,
     InventoryGatewayInterface,
